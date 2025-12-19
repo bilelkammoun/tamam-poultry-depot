@@ -72,6 +72,8 @@
 
     <script src="database.js"></script>
     <script>
+        DB.init();
+        
         document.addEventListener('DOMContentLoaded', () => {
             const session = DB.checkAuth();
             if (session.role !== 'Admin') {

@@ -38,6 +38,8 @@
 
     <script src="database.js"></script>
     <script>
+        DB.init(); // Initialize database with sample data if needed
+        
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const user = DB.login(

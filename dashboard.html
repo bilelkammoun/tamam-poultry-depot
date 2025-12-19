@@ -75,6 +75,8 @@
 
     <script src="database.js"></script>
     <script>
+        DB.init(); // Initialize database
+        
         const session = DB.checkAuth();
         
         document.getElementById('user-name').textContent = session.name;
