@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMAM POULTRY - Historique</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="brand" style="margin-bottom: 30px; padding: 0 10px;">
+                <h2 style="font-size: 1.2rem; background: linear-gradient(to right, #818cf8, #c084fc); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TAMAM POULTRY</h2>
+            </div>
+            
+            <a href="dashboard.html" class="nav-link">
+                <span>🏠 Dashboard</span>
+            </a>
+            <a href="inventory.html" class="nav-link">
+                <span>📦 Stock Magasin</span>
+            </a>
+            <a href="movements.html" class="nav-link active">
+                <span>🔄 Mouvements</span>
+            </a>
+            <a href="users.html" class="nav-link" id="nav-users">
+                <span>👥 Utilisateurs</span>
+            </a>
+            
+            <div style="margin-top: auto;">
+                <button class="btn-secondary" onclick="DB.logout()" style="width: 100%; justify-content: flex-start; border: none; background: transparent;">
+                    <span>🚪 Déconnexion</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header style="margin-bottom: 30px;">
+                <h1 style="font-size: 2rem;">Historique des Mouvements</h1>
+                <p class="subtitle">Traçabilité complète des entrées et sorties de stock</p>
+            </header>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Action</th>
+                            <th>Code</th>
+                            <th>Article</th>
+                            <th>Qté</th>
+                            <th>Utilisateur</th>
+                            <th>Motif</th>
+                        </tr>
+                    </thead>
+                    <tbody id="movements-body">
+                        <!-- Content via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="database.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const session = DB.checkAuth();
+            if (session.role === 'Technicien') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            if (session.role === 'Magasinier') {
+                document.getElementById('nav-users').style.display = 'none';
+            }
+
+            const body = document.getElementById('movements-body');
+            const movements = DB.getMovements();
+
+            movements.forEach(m => {
+                const tr = document.createElement('tr');
+                const date = new Date(m.date).toLocaleString('fr-FR');
+                tr.innerHTML = `
+                    <td style="font-size: 0.85rem; color: var(--text-muted)">${date}</td>
+                    <td><span class="badge ${m.action === 'Entrée' ? 'badge-stock' : 'badge-low'}">${m.action}</span></td>
+                    <td><code style="color: var(--info-color)">${m.partCode}</code></td>
+                    <td><strong>${m.partName}</strong></td>
+                    <td>${m.quantity}</td>
+                    <td>${m.user}</td>
+                    <td style="font-style: italic">${m.reason || '-'}</td>
+                `;
+                body.appendChild(tr);
+            });
+        });
+    </script>
+</body>
+</html>

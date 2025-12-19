@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMAM POULTRY - Utilisateurs</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="brand" style="margin-bottom: 30px; padding: 0 10px;">
+                <h2 style="font-size: 1.2rem; background: linear-gradient(to right, #818cf8, #c084fc); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TAMAM POULTRY</h2>
+            </div>
+            
+            <a href="dashboard.html" class="nav-link">
+                <span>🏠 Dashboard</span>
+            </a>
+            <a href="inventory.html" class="nav-link">
+                <span>📦 Stock Magasin</span>
+            </a>
+            <a href="movements.html" class="nav-link">
+                <span>🔄 Mouvements</span>
+            </a>
+            <a href="users.html" class="nav-link active">
+                <span>👥 Utilisateurs</span>
+            </a>
+            
+            <div style="margin-top: auto;">
+                <button class="btn-secondary" onclick="DB.logout()" style="width: 100%; justify-content: flex-start; border: none; background: transparent;">
+                    <span>🚪 Déconnexion</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="font-size: 2rem;">Gestion des Utilisateurs</h1>
+                    <p class="subtitle">Contrôle des accès et rôles</p>
+                </div>
+                <!-- Simple user addition could be added here if needed -->
+            </header>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom d'utilisateur</th>
+                            <th>Nom Complet</th>
+                            <th>Rôle</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-body">
+                        <!-- Content via JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-muted);">
+                ℹ️ Les identifiants par défaut sont configurés dans la base de données.
+            </p>
+        </main>
+    </div>
+
+    <script src="database.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const session = DB.checkAuth();
+            if (session.role !== 'Admin') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            const body = document.getElementById('users-body');
+            const users = JSON.parse(localStorage.getItem('tamam_users')) || [];
+
+            users.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${u.id}</td>
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.name}</td>
+                    <td><span class="badge ${u.role === 'Admin' ? 'badge-stock' : (u.role === 'Magasinier' ? 'badge-role' : 'badge-low')}">${u.role}</span></td>
+                    <td><span class="badge badge-stock">Actif</span></td>
+                `;
+                body.appendChild(tr);
+            });
+        });
+    </script>
+</body>
+</html>

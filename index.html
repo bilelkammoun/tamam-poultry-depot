@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMAM POULTRY - Connexion</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body class="auth-page">
+    <div class="glass-container auth-card">
+        <header>
+            <h1>TAMAM POULTRY</h1>
+            <p class="subtitle">Dépôt Pièces de Rechange</p>
+        </header>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" placeholder="Ex: admin" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <p id="error-msg" class="status-message warning hidden">Identifiants incorrects</p>
+            <button type="submit" class="btn-primary" style="width: 100%;">
+                <span class="text">Se connecter</span>
+            </button>
+        </form>
+
+        <footer>
+            <p>&copy; 2025 TAMAM POULTRY - Accès Sécurisé</p>
+        </footer>
+    </div>
+
+    <script src="database.js"></script>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = DB.login(
+                document.getElementById('username').value,
+                document.getElementById('password').value
+            );
+            
+            if (user) {
+                window.location.href = 'dashboard.html';
+            } else {
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
