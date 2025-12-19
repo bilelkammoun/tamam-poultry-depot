@@ -2,7 +2,7 @@
  * TAMAM POULTRY - Inventory Management Logic
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const session = DB.checkAuth();
     
     const inventoryBody = document.getElementById('inventory-body');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryFilter = document.getElementById('category-filter');
     const clearAllBtn = document.getElementById('clear-all-btn');
 
-    let articles = DB.getArticles();
+    let articles = await DB.getArticles();
     let currentEditCode = null;
 
     // --- Role Based UI ---
@@ -133,27 +133,27 @@ document.addEventListener('DOMContentLoaded', () => {
             unit: document.getElementById('art-unit').value,
             stock: parseInt(document.getElementById('art-stock').value) || 0
         };
-        DB.saveArticle(article);
-        articles = DB.getArticles();
+        await DB.saveArticle(article);
+        articles = await DB.getArticles();
         renderInventory();
         articleModal.classList.add('hidden');
     });
 
-    window.deleteArticle = (code) => {
+    window.deleteArticle = async (code) => {
         if (confirm('Supprimer cet article ?')) {
-            DB.deleteArticle(code);
-            articles = DB.getArticles();
+            await DB.deleteArticle(code);
+            articles = await DB.getArticles();
             renderInventory();
         }
     };
 
-    clearAllBtn.addEventListener('click', () => {
+    clearAllBtn.addEventListener('click', async () => {
         const confirm1 = confirm("⚠️ ATTENTION : Voulez-vous vraiment EFFACER TOUS les articles du magasin ? Cette action est irréversible.");
         if (confirm1) {
             const confirm2 = confirm("Sûr à 100% ? Tout le stock sera remis à zéro.");
             if (confirm2) {
-                DB.clearArticles();
-                articles = DB.getArticles();
+                await DB.clearArticles();
+                articles = await DB.getArticles();
                 renderInventory();
                 alert("Le magasin a été vidé.");
             }
@@ -185,9 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         article.stock = type === 'IN' ? article.stock + quantity : article.stock - quantity;
-        DB.saveArticle(article);
+        await DB.saveArticle(article);
         
-        DB.addMovement({
+        await DB.addMovement({
             partCode: code,
             partName: article.name,
             action: type === 'IN' ? 'Entrée' : 'Sortie',
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reason: reason
         });
 
-        articles = DB.getArticles();
+        articles = await DB.getArticles();
         renderInventory();
         movementModal.classList.add('hidden');
         movementForm.reset();
@@ -253,11 +253,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 
                 if (article.code) {
-                    DB.saveArticle(article);
+                    await DB.saveArticle(article);
                 }
             });
 
-            articles = DB.getArticles();
+            articles = await DB.getArticles();
             renderInventory();
             alert(`${json.length} articles synchronisés avec succès.`);
         };

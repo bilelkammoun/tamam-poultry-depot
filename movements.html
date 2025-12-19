@@ -65,11 +65,13 @@
         </main>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="database.js"></script>
     <script>
         DB.init();
         
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const session = DB.checkAuth();
             if (session.role === 'Technicien') {
                 window.location.href = 'dashboard.html';
@@ -80,7 +82,7 @@
             }
 
             const body = document.getElementById('movements-body');
-            const movements = DB.getMovements();
+            const movements = await DB.getMovements();
 
             movements.forEach(m => {
                 const tr = document.createElement('tr');

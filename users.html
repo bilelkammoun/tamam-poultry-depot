@@ -107,11 +107,13 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="database.js"></script>
     <script>
         DB.init();
         
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const session = DB.checkAuth();
             if (session.role !== 'Admin') {
                 window.location.href = 'dashboard.html';
@@ -119,7 +121,7 @@
             }
 
             const body = document.getElementById('users-body');
-            const users = JSON.parse(localStorage.getItem('tamam_users')) || [];
+            const users = await DB.getUsers();
 
             users.forEach(u => {
                 const tr = document.createElement('tr');
@@ -186,15 +188,15 @@
             currentEditId = null;
         }
 
-        function editUser(id) {
-            const users = DB.getUsers();
+        async function editUser(id) {
+            const users = await DB.getUsers();
             const user = users.find(u => u.id === id);
             if (user) {
                 openUserModal(user);
             }
         }
 
-        function saveUser(e) {
+        async function saveUser(e) {
             e.preventDefault();
             
             const userData = {
@@ -208,21 +210,18 @@
                 // Update existing user
                 const updates = { ...userData };
                 if (!userData.password) delete updates.password; // Don't update password if empty
-                DB.updateUser(currentEditId, updates);
+                await DB.updateUser(currentEditId, updates);
             } else {
                 // Add new user
-                const users = DB.getUsers();
-                const newId = Math.max(...users.map(u => u.id), 0) + 1;
-                userData.id = newId;
-                DB.saveUser(userData);
+                await DB.saveUser(userData);
             }
             
             closeUserModal();
             location.reload(); // Refresh to show changes
         }
 
-        function deleteUser(id) {
-            DB.deleteUser(id);
+        async function deleteUser(id) {
+            await DB.deleteUser(id);
             location.reload();
         }
     </script>

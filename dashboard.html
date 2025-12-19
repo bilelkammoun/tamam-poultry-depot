@@ -73,6 +73,8 @@
         </main>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="database.js"></script>
     <script>
         DB.init(); // Initialize database
@@ -109,13 +111,18 @@
             actionsDiv.innerHTML += `
                 <button class="btn-primary" onclick="window.location.href='inventory.html?action=add'">➕ Ajouter Article</button>
                 <button class="btn-secondary" onclick="window.location.href='inventory.html?action=import'">📈 Importer PDR</button>
-                <button class="btn-secondary" onclick="alert('Valeur totale du stock: ' + DB.getTotalStockValue().toFixed(2) + ' €')">💰 Valoriser Stock</button>
+                <button class="btn-secondary" onclick="showStockValue()">💰 Valoriser Stock</button>
             `;
         }
         if (session.role === 'Technicien') {
             actionsDiv.innerHTML += `
                 <button class="btn-primary" onclick="window.location.href='inventory.html'">🔍 Consulter Stock</button>
             `;
+        }
+
+        async function showStockValue() {
+            const value = await DB.getTotalStockValue();
+            alert('Valeur totale du stock: ' + value.toFixed(2) + ' €');
         }
     </script>
 </body>

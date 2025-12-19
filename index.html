@@ -36,13 +36,15 @@
         </footer>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="database.js"></script>
     <script>
         DB.init(); // Initialize database with sample data if needed
         
-        document.getElementById('login-form').addEventListener('submit', (e) => {
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const user = DB.login(
+            const user = await DB.login(
                 document.getElementById('username').value,
                 document.getElementById('password').value
             );

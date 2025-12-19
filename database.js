@@ -1,48 +1,53 @@
 /**
  * TAMAM POULTRY - Central Database & Logic
- * Handles localStorage persistence for articles, users, and movements.
+ * Firebase Firestore integration for real-time synchronization
  */
 
+// Firebase configuration (replace with your project config)
+const firebaseConfig = {
+    apiKey: "AIzaSyB-1QjtXO8oLjaQvqZHKNjadhUW6Ks4SNE",
+    authDomain: "tamam-poultry-depot.firebaseapp.com",
+    projectId: "tamam-poultry-depot",
+    storageBucket: "tamam-poultry-depot.firebasestorage.app",
+    messagingSenderId: "324510421642",
+    appId: "1:324510421642:web:d6bcf45f07f0c0d9315373",
+    measurementId: "G-KS12K7VB3J"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Keys (now Firestore collections)
 const DB = {
-    // Keys
-    ARTICLES: 'tamam_articles',
-    USERS: 'tamam_users',
-    MOVEMENTS: 'tamam_movements',
-    SESSION: 'tamam_session',
+    ARTICLES: 'articles',
+    USERS: 'users',
+    MOVEMENTS: 'movements',
+    SESSION: 'session',
 
     // --- Initialization ---
-    init() {
-        if (!localStorage.getItem(this.USERS)) {
-            const initialUsers = [
-                { id: 1, username: 'admin', password: '123', name: 'Administrateur', role: 'Admin' },
-                { id: 2, username: 'magasin', password: '123', name: 'Magasinier 1', role: 'Magasinier' },
-                { id: 3, username: 'tech', password: '123', name: 'Technicien 1', role: 'Technicien' }
-            ];
-            localStorage.setItem(this.USERS, JSON.stringify(initialUsers));
-        }
-
-        if (!localStorage.getItem(this.ARTICLES)) {
-            const initialArticles = [
-                { code: 'MOT-01', name: 'Moteur ABB 5.5kW', category: 'Moteurs', stock: 12, location: 'Rayon A-1', supplier: 'ABB', price: 150.50, unit: 'pce', lastUpdate: new Date().toISOString() },
-                { code: 'RMT-6205', name: 'Roulement 6205', category: 'Mécanique', stock: 5, location: 'Armoire B', supplier: 'SKF', price: 12.00, unit: 'pce', lastUpdate: new Date().toISOString() }
-            ];
-            localStorage.setItem(this.ARTICLES, JSON.stringify(initialArticles));
-        }
-
-        if (!localStorage.getItem(this.MOVEMENTS)) {
-            localStorage.setItem(this.MOVEMENTS, JSON.stringify([]));
-        }
+    async init() {
+        // No need for localStorage init, data comes from Firestore
+        console.log('Firebase initialized');
     },
 
     // --- Auth Logic ---
-    login(username, password) {
-        const users = JSON.parse(localStorage.getItem(this.USERS)) || [];
-        const user = users.find(u => u.username === username && u.password === password);
-        if (user) {
-            localStorage.setItem(this.SESSION, JSON.stringify(user));
-            return user;
+    async login(username, password) {
+        try {
+            const usersRef = db.collection(this.USERS);
+            const snapshot = await usersRef.where('username', '==', username).where('password', '==', password).get();
+            
+            if (!snapshot.empty) {
+                const user = snapshot.docs[0].data();
+                user.id = snapshot.docs[0].id;
+                localStorage.setItem(this.SESSION, JSON.stringify(user)); // Keep session local
+                return user;
+            }
+            return null;
+        } catch (error) {
+            console.error('Login error:', error);
+            return null;
         }
-        return null;
     },
 
     logout() {
@@ -63,76 +68,123 @@ const DB = {
     },
 
     // --- User Management ---
-    getUsers() {
-        return JSON.parse(localStorage.getItem(this.USERS)) || [];
-    },
-
-    saveUser(user) {
-        const users = this.getUsers();
-        users.push(user);
-        localStorage.setItem(this.USERS, JSON.stringify(users));
-    },
-
-    updateUser(id, updates) {
-        const users = this.getUsers();
-        const index = users.findIndex(u => u.id === id);
-        if (index !== -1) {
-            users[index] = { ...users[index], ...updates };
-            localStorage.setItem(this.USERS, JSON.stringify(users));
+    async getUsers() {
+        try {
+            const snapshot = await db.collection(this.USERS).get();
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error('Get users error:', error);
+            return [];
         }
     },
 
-    deleteUser(id) {
-        const users = this.getUsers();
-        const filtered = users.filter(u => u.id !== id);
-        localStorage.setItem(this.USERS, JSON.stringify(filtered));
+    async saveUser(user) {
+        try {
+            await db.collection(this.USERS).add(user);
+        } catch (error) {
+            console.error('Save user error:', error);
+        }
+    },
+
+    async updateUser(id, updates) {
+        try {
+            await db.collection(this.USERS).doc(id).update(updates);
+        } catch (error) {
+            console.error('Update user error:', error);
+        }
+    },
+
+    async deleteUser(id) {
+        try {
+            await db.collection(this.USERS).doc(id).delete();
+        } catch (error) {
+            console.error('Delete user error:', error);
+        }
     },
 
     // --- Articles Logic ---
-    getArticles() {
-        return JSON.parse(localStorage.getItem(this.ARTICLES)) || [];
-    },
-
-    saveArticle(article) {
-        let articles = this.getArticles();
-        const index = articles.findIndex(a => a.code === article.code);
-        article.lastUpdate = new Date().toISOString();
-        if (index > -1) {
-            // Merge existing data with new data
-            articles[index] = { ...articles[index], ...article };
-        } else {
-            articles.push(article);
+    async getArticles() {
+        try {
+            const snapshot = await db.collection(this.ARTICLES).get();
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error('Get articles error:', error);
+            return [];
         }
-        localStorage.setItem(this.ARTICLES, JSON.stringify(articles));
     },
 
-    deleteArticle(code) {
-        let articles = this.getArticles();
-        articles = articles.filter(a => a.code !== code);
-        localStorage.setItem(this.ARTICLES, JSON.stringify(articles));
+    async saveArticle(article) {
+        try {
+            const articlesRef = db.collection(this.ARTICLES);
+            const existing = await articlesRef.where('code', '==', article.code).get();
+            
+            article.lastUpdate = new Date().toISOString();
+            
+            if (!existing.empty) {
+                // Update existing
+                await articlesRef.doc(existing.docs[0].id).update(article);
+            } else {
+                // Add new
+                await articlesRef.add(article);
+            }
+        } catch (error) {
+            console.error('Save article error:', error);
+        }
     },
 
-    clearArticles() {
-        localStorage.setItem(this.ARTICLES, JSON.stringify([]));
+    async deleteArticle(code) {
+        try {
+            const articlesRef = db.collection(this.ARTICLES);
+            const snapshot = await articlesRef.where('code', '==', code).get();
+            if (!snapshot.empty) {
+                await articlesRef.doc(snapshot.docs[0].id).delete();
+            }
+        } catch (error) {
+            console.error('Delete article error:', error);
+        }
     },
 
-    getTotalStockValue() {
-        const articles = this.getArticles();
-        return articles.reduce((total, article) => {
-            return total + (article.stock * (article.price || 0));
-        }, 0);
+    async clearArticles() {
+        try {
+            const snapshot = await db.collection(this.ARTICLES).get();
+            const batch = db.batch();
+            snapshot.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+        } catch (error) {
+            console.error('Clear articles error:', error);
+        }
+    },
+
+    async getTotalStockValue() {
+        try {
+            const articles = await this.getArticles();
+            return articles.reduce((total, article) => {
+                return total + (article.stock * (article.price || 0));
+            }, 0);
+        } catch (error) {
+            console.error('Get total stock value error:', error);
+            return 0;
+        }
     },
 
     // --- Movements Logic ---
-    getMovements() {
-        return JSON.parse(localStorage.getItem(this.MOVEMENTS)) || [];
+    async getMovements() {
+        try {
+            const snapshot = await db.collection(this.MOVEMENTS).orderBy('date', 'desc').get();
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error('Get movements error:', error);
+            return [];
+        }
     },
 
-    addMovement(movement) {
-        const movements = this.getMovements();
-        movement.date = new Date().toISOString();
-        movements.unshift(movement); // Newest first
-        localStorage.setItem(this.MOVEMENTS, JSON.stringify(movements));
+    async addMovement(movement) {
+        try {
+            movement.date = new Date().toISOString();
+            await db.collection(this.MOVEMENTS).add(movement);
+        } catch (error) {
+            console.error('Add movement error:', error);
+        }
     }
 };
 
