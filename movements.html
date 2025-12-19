@@ -69,7 +69,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="database.js"></script>
     <script>
-        DB.init();
+        (async () => {
+            await DB.init();
+        })();
         
         document.addEventListener('DOMContentLoaded', async () => {
             const session = DB.checkAuth();

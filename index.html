@@ -40,21 +40,23 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="database.js"></script>
     <script>
-        DB.init(); // Initialize database with sample data if needed
-        
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const user = await DB.login(
-                document.getElementById('username').value,
-                document.getElementById('password').value
-            );
+        (async () => {
+            await DB.init(); // Initialize database with sample data if needed
             
-            if (user) {
-                window.location.href = 'dashboard.html';
-            } else {
-                document.getElementById('error-msg').classList.remove('hidden');
-            }
-        });
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const user = await DB.login(
+                    document.getElementById('username').value,
+                    document.getElementById('password').value
+                );
+                
+                if (user) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    document.getElementById('error-msg').classList.remove('hidden');
+                }
+            });
+        })();
     </script>
 </body>
 </html>

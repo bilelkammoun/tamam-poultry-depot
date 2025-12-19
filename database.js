@@ -27,8 +27,48 @@ const DB = {
 
     // --- Initialization ---
     async init() {
-        // No need for localStorage init, data comes from Firestore
-        console.log('Firebase initialized');
+        try {
+            // Check if users collection is empty and create initial users
+            const usersSnapshot = await db.collection(this.USERS).get();
+            if (usersSnapshot.empty) {
+                console.log('Creating initial users...');
+                const initialUsers = [
+                    { username: 'admin', password: '123', name: 'Administrateur', role: 'Admin' },
+                    { username: 'magasin', password: '123', name: 'Magasinier 1', role: 'Magasinier' },
+                    { username: 'tech', password: '123', name: 'Technicien 1', role: 'Technicien' }
+                ];
+                
+                const batch = db.batch();
+                initialUsers.forEach(user => {
+                    const docRef = db.collection(this.USERS).doc();
+                    batch.set(docRef, user);
+                });
+                await batch.commit();
+                console.log('Initial users created');
+            }
+
+            // Check if articles collection is empty and create initial articles
+            const articlesSnapshot = await db.collection(this.ARTICLES).get();
+            if (articlesSnapshot.empty) {
+                console.log('Creating initial articles...');
+                const initialArticles = [
+                    { code: 'MOT-01', name: 'Moteur ABB 5.5kW', category: 'Moteurs', stock: 12, location: 'Rayon A-1', supplier: 'ABB', price: 150.50, unit: 'pce', lastUpdate: new Date().toISOString() },
+                    { code: 'RMT-6205', name: 'Roulement 6205', category: 'Mécanique', stock: 5, location: 'Armoire B', supplier: 'SKF', price: 12.00, unit: 'pce', lastUpdate: new Date().toISOString() }
+                ];
+                
+                const batch = db.batch();
+                initialArticles.forEach(article => {
+                    const docRef = db.collection(this.ARTICLES).doc();
+                    batch.set(docRef, article);
+                });
+                await batch.commit();
+                console.log('Initial articles created');
+            }
+
+            console.log('Firebase initialized with data');
+        } catch (error) {
+            console.error('Error initializing Firebase data:', error);
+        }
     },
 
     // --- Auth Logic ---

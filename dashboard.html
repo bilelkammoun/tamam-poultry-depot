@@ -77,9 +77,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="database.js"></script>
     <script>
-        DB.init(); // Initialize database
-        
-        const session = DB.checkAuth();
+        (async () => {
+            await DB.init(); // Initialize database
+            
+            const session = DB.checkAuth();
         
         document.getElementById('user-name').textContent = session.name;
         document.getElementById('user-role').textContent = session.role;
@@ -124,6 +125,7 @@
             const value = await DB.getTotalStockValue();
             alert('Valeur totale du stock: ' + value.toFixed(2) + ' €');
         }
+        })(); // Close async IIFE
     </script>
 </body>
 </html>
