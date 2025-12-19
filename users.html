@@ -145,13 +145,13 @@
             document.getElementById('add-user-btn').addEventListener('click', () => openUserModal());
             document.querySelectorAll('.btn-edit').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const id = parseInt(e.target.dataset.id);
+                    const id = e.target.dataset.id; // Keep as string for Firebase IDs
                     editUser(id);
                 });
             });
             document.querySelectorAll('.btn-delete').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const id = parseInt(e.target.dataset.id);
+                    const id = e.target.dataset.id; // Keep as string for Firebase IDs
                     if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
                         deleteUser(id);
                     }

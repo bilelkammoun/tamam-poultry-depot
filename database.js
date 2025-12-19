@@ -28,8 +28,10 @@ const DB = {
     // --- Initialization ---
     async init() {
         try {
+            console.log('Initializing Firebase...');
             // Check if users collection is empty and create initial users
             const usersSnapshot = await db.collection(this.USERS).get();
+            console.log('Users collection size:', usersSnapshot.size);
             if (usersSnapshot.empty) {
                 console.log('Creating initial users...');
                 const initialUsers = [
@@ -49,6 +51,7 @@ const DB = {
 
             // Check if articles collection is empty and create initial articles
             const articlesSnapshot = await db.collection(this.ARTICLES).get();
+            console.log('Articles collection size:', articlesSnapshot.size);
             if (articlesSnapshot.empty) {
                 console.log('Creating initial articles...');
                 const initialArticles = [
@@ -74,15 +77,20 @@ const DB = {
     // --- Auth Logic ---
     async login(username, password) {
         try {
+            console.log('Attempting login for:', username);
             const usersRef = db.collection(this.USERS);
             const snapshot = await usersRef.where('username', '==', username).where('password', '==', password).get();
+            
+            console.log('Login query result:', snapshot.empty ? 'empty' : 'found');
             
             if (!snapshot.empty) {
                 const user = snapshot.docs[0].data();
                 user.id = snapshot.docs[0].id;
                 localStorage.setItem(this.SESSION, JSON.stringify(user)); // Keep session local
+                console.log('Login successful for:', user.username);
                 return user;
             }
+            console.log('Login failed: invalid credentials');
             return null;
         } catch (error) {
             console.error('Login error:', error);

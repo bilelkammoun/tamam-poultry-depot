@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('nav-movements').style.display = 'none';
         document.getElementById('nav-users').style.display = 'none';
     } else if (session.role === 'Magasinier') {
+        document.getElementById('admin-actions').style.display = 'none';
         document.getElementById('nav-users').style.display = 'none';
     }
 
