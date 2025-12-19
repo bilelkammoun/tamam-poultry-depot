@@ -62,6 +62,32 @@ const DB = {
         return session;
     },
 
+    // --- User Management ---
+    getUsers() {
+        return JSON.parse(localStorage.getItem(this.USERS)) || [];
+    },
+
+    saveUser(user) {
+        const users = this.getUsers();
+        users.push(user);
+        localStorage.setItem(this.USERS, JSON.stringify(users));
+    },
+
+    updateUser(id, updates) {
+        const users = this.getUsers();
+        const index = users.findIndex(u => u.id === id);
+        if (index !== -1) {
+            users[index] = { ...users[index], ...updates };
+            localStorage.setItem(this.USERS, JSON.stringify(users));
+        }
+    },
+
+    deleteUser(id) {
+        const users = this.getUsers();
+        const filtered = users.filter(u => u.id !== id);
+        localStorage.setItem(this.USERS, JSON.stringify(filtered));
+    },
+
     // --- Articles Logic ---
     getArticles() {
         return JSON.parse(localStorage.getItem(this.ARTICLES)) || [];

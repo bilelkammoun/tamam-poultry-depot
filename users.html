@@ -44,7 +44,7 @@
                     <h1 style="font-size: 2rem;">Gestion des Utilisateurs</h1>
                     <p class="subtitle">Contrôle des accès et rôles</p>
                 </div>
-                <!-- Simple user addition could be added here if needed -->
+                <button id="add-user-btn" class="btn-primary">➕ Ajouter Utilisateur</button>
             </header>
 
             <div class="table-container">
@@ -56,6 +56,7 @@
                             <th>Nom Complet</th>
                             <th>Rôle</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="users-body">
@@ -68,6 +69,42 @@
                 ℹ️ Les identifiants par défaut sont configurés dans la base de données.
             </p>
         </main>
+    </div>
+
+    <!-- User Modal -->
+    <div id="user-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Ajouter Utilisateur</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="user-form">
+                <div class="form-group">
+                    <label for="user-username">Nom d'utilisateur</label>
+                    <input type="text" id="user-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-password">Mot de passe</label>
+                    <input type="password" id="user-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-name">Nom Complet</label>
+                    <input type="text" id="user-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-role">Rôle</label>
+                    <select id="user-role" required>
+                        <option value="Technicien">Technicien</option>
+                        <option value="Magasinier">Magasinier</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeUserModal()">Annuler</button>
+                    <button type="submit" class="btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="database.js"></script>
@@ -92,10 +129,102 @@
                     <td>${u.name}</td>
                     <td><span class="badge ${u.role === 'Admin' ? 'badge-stock' : (u.role === 'Magasinier' ? 'badge-role' : 'badge-low')}">${u.role}</span></td>
                     <td><span class="badge badge-stock">Actif</span></td>
+                    <td>
+                        <button class="btn-small btn-edit" data-id="${u.id}">✏️</button>
+                        <button class="btn-small btn-delete" data-id="${u.id}" ${u.id === session.id ? 'disabled' : ''}>🗑️</button>
+                    </td>
                 `;
                 body.appendChild(tr);
             });
+
+            // Event listeners
+            document.getElementById('add-user-btn').addEventListener('click', () => openUserModal());
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.dataset.id);
+                    editUser(id);
+                });
+            });
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.dataset.id);
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                        deleteUser(id);
+                    }
+                });
+            });
+
+            document.getElementById('user-form').addEventListener('submit', saveUser);
+            document.querySelector('.modal-close').addEventListener('click', closeUserModal);
         });
+
+        let currentEditId = null;
+
+        function openUserModal(user = null) {
+            const modal = document.getElementById('user-modal');
+            const form = document.getElementById('user-form');
+            const title = document.getElementById('modal-title');
+            
+            if (user) {
+                title.textContent = 'Modifier Utilisateur';
+                document.getElementById('user-username').value = user.username;
+                document.getElementById('user-password').value = ''; // Don't show password
+                document.getElementById('user-name').value = user.name;
+                document.getElementById('user-role').value = user.role;
+                currentEditId = user.id;
+            } else {
+                title.textContent = 'Ajouter Utilisateur';
+                form.reset();
+                currentEditId = null;
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeUserModal() {
+            document.getElementById('user-modal').classList.add('hidden');
+            currentEditId = null;
+        }
+
+        function editUser(id) {
+            const users = DB.getUsers();
+            const user = users.find(u => u.id === id);
+            if (user) {
+                openUserModal(user);
+            }
+        }
+
+        function saveUser(e) {
+            e.preventDefault();
+            
+            const userData = {
+                username: document.getElementById('user-username').value,
+                password: document.getElementById('user-password').value,
+                name: document.getElementById('user-name').value,
+                role: document.getElementById('user-role').value
+            };
+
+            if (currentEditId) {
+                // Update existing user
+                const updates = { ...userData };
+                if (!userData.password) delete updates.password; // Don't update password if empty
+                DB.updateUser(currentEditId, updates);
+            } else {
+                // Add new user
+                const users = DB.getUsers();
+                const newId = Math.max(...users.map(u => u.id), 0) + 1;
+                userData.id = newId;
+                DB.saveUser(userData);
+            }
+            
+            closeUserModal();
+            location.reload(); // Refresh to show changes
+        }
+
+        function deleteUser(id) {
+            DB.deleteUser(id);
+            location.reload();
+        }
     </script>
 </body>
 </html>

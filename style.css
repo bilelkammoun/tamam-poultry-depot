@@ -187,6 +187,28 @@ input:focus, select:focus, textarea:focus {
     background: rgba(255, 255, 255, 0.2);
 }
 
+.btn-small {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin: 0 2px;
+}
+
+.btn-small:hover {
+    background: var(--glass-bg);
+    color: var(--text-main);
+}
+
+.btn-small:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* Tables */
 .table-container {
     overflow-x: auto;
