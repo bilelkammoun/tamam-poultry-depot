@@ -65,16 +65,13 @@ body {
     color: var(--text-muted);
     text-decoration: none;
     transition: all 0.3s;
+    font-weight: bold;
 }
 
 .nav-link:hover, .nav-link.active {
     background: var(--glass-bg);
     color: var(--text-main);
     border: 1px solid var(--glass-border);
-}
-
-.nav-link.active {
-    border-color: var(--primary-color);
 }
 
 .main-content {
@@ -264,8 +261,9 @@ tr:hover {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .sidebar { width: 120px; padding: 20px 10px; }
-    .nav-link span { font-size: 0.8rem; }
-    .nav-link { justify-content: flex-start; padding: 12px 8px; }
+    .sidebar { width: 140px; padding: 20px 10px; }
+    .brand { display: none; }
+    .nav-link { gap: 8px; font-size: 0.75rem; padding: 10px 6px; font-weight: bold; }
+    .nav-link span { font-size: 0.75rem; }
     .main-content { padding: 20px; }
 }
